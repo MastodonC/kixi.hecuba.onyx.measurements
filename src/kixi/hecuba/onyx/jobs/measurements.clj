@@ -41,7 +41,7 @@
     :onyx/batch-timeout batch-timeout
     :onyx/doc "Identity output"}
 
-   {:onyx/name :out-confirm
+   {:onyx/name :event/out-confirm
     :onyx/plugin :onyx.plugin.core-async/output
     :onyx/type :output
     :onyx/medium :core.async

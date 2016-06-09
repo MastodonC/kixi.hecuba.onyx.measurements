@@ -19,7 +19,7 @@
    :onyx.log/config {}
    :onyx.peer/job-scheduler :onyx.job-scheduler/balanced
    :onyx.messaging/impl :aeron
-   :onyx.messaging/peer-port 40200
+   :onyx.messaging/peer-port 40201
    :onyx.messaging/bind-addr "localhost"})
 
 (defn start-onyx-env!
