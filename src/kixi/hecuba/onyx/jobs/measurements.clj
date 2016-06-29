@@ -3,10 +3,13 @@
             [cheshire.core :as json]
             [taoensso.timbre :as timbre]
             [onyx.plugin.core-async :refer [take-segments!]]
+            [onyx.tasks.core-async :as core-async-task]
             [onyx.api]
             [onyx.plugin.kafka]
+            [onyx.tasks.kafka :as kafka-task]
+            [onyx.job :refer [add-task register-job]]
             [kixi.hecuba.onyx.jobs.shared]
-            [kixi.hecuba.onyx.jobs.measurements-connector]))
+            [kixi.hecuba.onyx.jobs.measurements-connector :refer [save-measurements]]))
 
 (def workflow
   [[:event/in-queue       :event/save-measurements]
@@ -41,7 +44,7 @@
     :onyx/batch-timeout batch-timeout
     :onyx/doc "Identity output"}
 
-   {:onyx/name :out-confirm
+   {:onyx/name :event/out-confirm
     :onyx/plugin :onyx.plugin.core-async/output
     :onyx/type :output
     :onyx/medium :core.async
@@ -69,3 +72,22 @@
    :lifecycles lifecycles
    :task-scheduler :onyx.task-scheduler/balanced
    :flow-conditions flow-conditions})
+
+(defn measurements-job
+  [batch-settings]
+  (let [base-job {:workflow workflow
+                  :catalog []
+                  :lifecycles []
+                  :windows []
+                  :triggers []
+                  :flow-conditions []
+                  :task-scheduler :onyx.task-scheduler/balanced}]
+    (-> base-job
+        (add-task (kafka-task/consumer :event/in-queue "hecuba-measurements-queue" "kixi-hecuba-weather" "127.0.0.1:2181" :smallest false :kixi.hecuba.onyx.jobs.shared/deserialize-message-json batch-settings))
+        (add-task (save-measurements :event/save-measurements batch-settings))
+        (add-task (core-async-task/output :event/out-confirm batch-settings)))))
+
+(defmethod register-job "measurements-job"
+  [job-name config]
+  (let [batch-settings {:onyx/batch-size 1 :onyx/batch-timeout 1000}]
+    (measurements-job batch-settings)))
