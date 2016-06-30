@@ -6,8 +6,8 @@
   :onyx.bookkeeper/delete-server-data? true
   :onyx.bookkeeper/local-quorum-ports [3196 3197 3198]
   :onyx.bookkeeper/port 3196
-  :Zookeeper/Address #Profile {:Default "127.0.0.1:2181"
-                               :Docker "Zookeeper:2181"}
+  :Zookeeper/address #Profile {:default "127.0.0.1:2188"
+                               :docker "Zookeeper:2181"}
   :Zookeeper/server? #profile {:default true
                                :docker false}
   :zookeeper.server/port 2188
@@ -16,7 +16,7 @@
  :peer-config
  {:onyx/tenancy-id #profile {:default "1"
                              :docker #env ONYX_ID}
-  :zookeeper/address #profile {:default "127.0.0.1:2181"
+  :zookeeper/address #profile {:default "127.0.0.1:2188"
                                :docker "zookeeper:2181"}
   :onyx.peer/job-scheduler :onyx.job-scheduler/greedy
   :onyx.peer/zookeeper-timeout 60000

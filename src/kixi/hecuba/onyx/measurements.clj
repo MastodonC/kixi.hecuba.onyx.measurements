@@ -8,8 +8,7 @@
             [aero.core :refer [read-config]]
             [com.stuartsierra.component :as component]
             ;; load job
-            [kixi.hecuba.onyx.jobs.measurements]
-            )
+            [kixi.hecuba.onyx.jobs.measurements])
   (:gen-class))
 
 (defn file-exists?
@@ -99,7 +98,9 @@
                                       (onyx.api/submit-job peer-config
                                                            (onyx.job/register-job job-name config)))]
                           (println "Successfully submitted job: " job-id)
-                          (println "Blocking on job completion..."))))))
+                          (println "Blocking on job completion...")
+                          (onyx.test-helper/feedback-exception! peer-config job-id)
+                          (onyx.api/await-job-completion peer-config job-id))))))
 
 
 

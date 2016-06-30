@@ -73,6 +73,21 @@
    :task-scheduler :onyx.task-scheduler/balanced
    :flow-conditions flow-conditions})
 
+(def kafka-consumer-task-opts
+  {:onyx/min-peers 1 ;; should be number of partitions
+   :onyx/max-peers 1
+   :kafka/topic "hecuba-measurements-queue"
+   :kafka/group-id "kixi-hecuba-weather"
+   :kafka/zookeeper "127.0.0.1:2181"
+   :kafka/deserializer-fn :kixi.hecuba.onyx.jobs.shared/deserialize-message-json
+   :kafka/fetch-size 307200
+   :kafka/chan-capacity 1000
+   :kafka/offset-reset :smallest
+   :kafka/force-reset? false
+   :kafka/empty-read-back-off 500
+   :kafka/commit-interval 500
+   :onyx/doc "Reads messages from a Kafka topic"})
+
 (defn measurements-job
   [batch-settings]
   (let [base-job {:workflow workflow
@@ -83,7 +98,7 @@
                   :flow-conditions []
                   :task-scheduler :onyx.task-scheduler/balanced}]
     (-> base-job
-        (add-task (kafka-task/consumer :event/in-queue "hecuba-measurements-queue" "kixi-hecuba-weather" "127.0.0.1:2181" :smallest false :kixi.hecuba.onyx.jobs.shared/deserialize-message-json batch-settings))
+        (add-task (kafka-task/consumer :event/in-queue (merge kafka-consumer-task-opts batch-settings)))
         (add-task (save-measurements :event/save-measurements batch-settings))
         (add-task (core-async-task/output :event/out-confirm batch-settings)))))
 
