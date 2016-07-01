@@ -97,10 +97,12 @@
                   :triggers []
                   :flow-conditions []
                   :task-scheduler :onyx.task-scheduler/balanced}]
-    (-> base-job
-        (add-task (kafka-task/consumer :event/in-queue (merge kafka-consumer-task-opts batch-settings)))
-        (add-task (save-measurements :event/save-measurements batch-settings))
-        (add-task (core-async-task/output :event/out-confirm batch-settings)))))
+    (let [kafka-merged-opts (merge kafka-consumer-task-opts batch-settings)]
+      (timbre/info "kafka merged opts: " kafka-merged-opts)
+      (-> base-job
+          (add-task (kafka-task/consumer :event/in-queue kafka-merged-opts))
+          (add-task (save-measurements :event/save-measurements batch-settings))
+          (add-task (core-async-task/output :event/out-confirm batch-settings))))))
 
 (defmethod register-job "measurements-job"
   [job-name config]

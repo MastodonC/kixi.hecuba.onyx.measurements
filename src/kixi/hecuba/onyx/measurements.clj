@@ -8,7 +8,8 @@
             [aero.core :refer [read-config]]
             [com.stuartsierra.component :as component]
             ;; load job
-            [kixi.hecuba.onyx.jobs.measurements])
+            [kixi.hecuba.onyx.jobs.measurements]
+            [kixi.hecuba.onyx.new-onyx-job :refer [new-onyx-job]])
   (:gen-class))
 
 (defn file-exists?
@@ -86,29 +87,29 @@
                        (onyx.api/await-job-completion peer-config job-id)
                        (exit 0 "Job Completed"))))))
 
+
 (defn new-system
   []
   (let [mode :dev]
     (component/system-map
      :onyx-events   (let [config-file (io/resource "config.edn")
-                          {:keys [peer-config] :as config} (read-config config-file {:profile nil})
+                          {:keys [peer-config] :as config} (read-config config-file {:profile :default})
                           job-name "measurements-job"]
                       (assert-job-exists job-name)
-                      (let [job-id (:job-id
-                                      (onyx.api/submit-job peer-config
-                                                           (onyx.job/register-job job-name config)))]
-                          (println "Successfully submitted job: " job-id)
-                          (println "Blocking on job completion...")
-                          (onyx.test-helper/feedback-exception! peer-config job-id)
-                          (onyx.api/await-job-completion peer-config job-id))))))
+                      (new-onyx-job job-name config)))))
 
 
 
 
 (comment
 
-
+  kixi.hecuba.onyx.components.onyx-job/new-onyx-job
   (new-system)
+
+
+  (let [mode :dev]
+    (component/system-map
+     :onyx-events   (new-onyx-job mode 'kixi.hecuba.onyx.jobs.measurements/build-job)))
 
 
   )
