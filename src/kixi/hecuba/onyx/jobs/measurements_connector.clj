@@ -37,10 +37,13 @@
   (let [entity-id (get-in fn-data [:kafka-payload :entity-id])
         device-id (get-in fn-data [:kafka-payload :device_id])
         measurements (:measurements fn-data)
-        degree-day (vec (:degree-day fn-data))]
-    (push-payload-to-hecuba measurements entity-id device-id)
-    (push-payload-to-hecuba degree-day entity-id device-id)
-    (timbre/info (format "Writing measurements and degree day reading to device %s on entity %s" device-id entity-id )))
+        degree-day [(:degree-day fn-data)]]
+    (if (> (count measurements) 0)
+      (push-payload-to-hecuba measurements entity-id device-id)
+      (timbre/info (format "Writing measurements to device %s on entity %s" device-id entity-id)))
+    (if (> (count degree-day) 0)
+      (push-payload-to-hecuba degree-day entity-id device-id)
+      (timbre/info (format "Writing degree day reading to device %s on entity %s" device-id entity-id))))
   {:done true})
 
 (s/defn save-measurements
