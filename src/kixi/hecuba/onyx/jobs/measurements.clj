@@ -55,7 +55,7 @@
    ])
 
 (def lifecycles
-  (->> (build-catalog 0 0)
+  (->> (build-catalog 1 0)
        (map :onyx/name)
        (mapv #(hash-map :lifecycle/task %
                         :lifecycle/calls :kixi.hecuba.onyx.jobs.shared/log-calls))
