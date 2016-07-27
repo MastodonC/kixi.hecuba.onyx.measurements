@@ -55,7 +55,7 @@
    ])
 
 (def lifecycles
-  (->> (build-catalog 0 0)
+  (->> (build-catalog 1 0)
        (map :onyx/name)
        (mapv #(hash-map :lifecycle/task %
                         :lifecycle/calls :kixi.hecuba.onyx.jobs.shared/log-calls))
@@ -83,7 +83,7 @@
    :kafka/fetch-size 307200
    :kafka/chan-capacity 1000
    :kafka/offset-reset :smallest
-   :kafka/force-reset? false
+   :kafka/force-reset? true
    :kafka/empty-read-back-off 500
    :kafka/commit-interval 500
    :onyx/doc "Reads messages from a Kafka topic"})
